@@ -5,7 +5,9 @@
       <map>
         <entry key="..\:/Users/mtkw/AndroidStudioProjects/TechAcademy/ApiApp/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/mtkw/AndroidStudioProjects/TechAcademy/ApiApp/app/src/main/res/layout/fragment_api.xml" value="0.10740740740740741" />
+        <entry key="..\:/Users/mtkw/AndroidStudioProjects/TechAcademy/ApiApp/app/src/main/res/layout/fragment_favorite.xml" value="0.13229166666666667" />
         <entry key="..\:/Users/mtkw/AndroidStudioProjects/TechAcademy/ApiApp/app/src/main/res/layout/recycler_favorite.xml" value="0.10740740740740741" />
+        <entry key="..\:/Users/mtkw/AndroidStudioProjects/TechAcademy/ApiApp/app/src/main/res/layout/recycler_favorite_empty.xml" value="0.1" />
       </map>
     </option>
   </component>

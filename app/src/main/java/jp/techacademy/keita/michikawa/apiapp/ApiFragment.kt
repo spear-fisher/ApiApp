@@ -1,5 +1,6 @@
 package jp.techacademy.keita.michikawa.apiapp
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,12 +15,25 @@ import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 import jp.techacademy.keita.michikawa.apiapp.databinding.FragmentApiBinding
 import android.util.Log
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 
 class ApiFragment: Fragment() {
     private lateinit var binding: FragmentApiBinding
     private val apiAdapter by lazy { ApiAdapter(requireContext()) }
     private val handler = Handler(Looper.getMainLooper())
+
+    private var fragmentCallback : FragmentCallback? = null // Fragment -> Activity にFavoriteの変更を通知する
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is FragmentCallback) {
+            fragmentCallback = context
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentApiBinding.inflate(layoutInflater)
@@ -29,6 +43,15 @@ class ApiFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // ここから初期化処理を行う
+        // ApiAdapterのお気に入り追加、削除用のメソッドの追加を行う
+        apiAdapter.apply {
+            onClickAddFavorite = { // Adapterの処理をそのままActivityに通知する
+                fragmentCallback?.onAddFavorite(it)
+            }
+            onClickDeleteFavorite = { // Adapterの処理をそのままActivityに通知する
+                fragmentCallback?.onDeleteFavorite(it.id)
+            }
+        }
         // RecyclerViewの初期化
         binding.recyclerView.apply {
             adapter = apiAdapter
@@ -38,6 +61,10 @@ class ApiFragment: Fragment() {
             updateData()
         }
         updateData()
+    }
+
+    fun updateView() { // お気に入りが削除されたときの処理（Activityからコールされる）
+        binding.recyclerView.adapter?.notifyDataSetChanged() // RecyclerViewのAdapterに対して再描画のリクエストをする
     }
 
     private fun updateData() {
@@ -51,14 +78,36 @@ class ApiFragment: Fragment() {
             .append("&keyword=").append(getString(R.string.api_keyword)) // お店の検索ワード。ここでは例として「ランチ」を検索
             .append("&format=json") // ここで利用しているAPIは戻りの形をxmlかjsonが選択することができる。Androidで扱う場合はxmlよりもjsonの方が扱いやすいので、jsonを選択
             .toString()
+
+        val x509TrustManager = object: X509TrustManager {
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                return arrayOf()
+            }
+        }
+
+        val trustManagers = arrayOf<TrustManager>(x509TrustManager)
+
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustManagers, null)
+
         val client = OkHttpClient.Builder()
+            .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+            .hostnameVerifier { _, _ -> true }
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
             .build()
+
         val request = Request.Builder()
             .url(url)
             .build()
+
         client.newCall(request).enqueue(object: Callback {
             override fun onFailure(call: Call, e: IOException) { // Error時の処理
                 Log.d("DebugLog", "ApiFailure")
@@ -91,6 +140,6 @@ class ApiFragment: Fragment() {
     }
 
     companion object {
-        private const val COUNT = 20 // 1回のAPIで取得する件数
+        private const val COUNT = 10 // 1回のAPIで取得する件数
     }
 }
