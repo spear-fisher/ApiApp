@@ -1,6 +1,7 @@
 package jp.techacademy.keita.michikawa.apiapp
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,9 @@ class ApiAdapter(private val context: Context): RecyclerView.Adapter<RecyclerVie
     // 一覧画面から削除するときのコールバック（ApiFragmentへ通知するメソッド)
     var onClickDeleteFavorite: ((Shop) -> Unit)? = null
 
+    // Itemを押したときのメソッド
+    var onClickItem: ((String) -> Unit)? = null
+
     // 表示リスト更新時に呼び出すメソッド
     fun refresh(list: List<Shop>) {
         items.apply {
@@ -28,6 +32,7 @@ class ApiAdapter(private val context: Context): RecyclerView.Adapter<RecyclerVie
             addAll(list) // itemsにlistを全て追加する
         }
         notifyDataSetChanged() // recyclerViewを再描画させる
+        Log.d("DebugLog", "refresh")
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -80,6 +85,7 @@ class ApiAdapter(private val context: Context): RecyclerView.Adapter<RecyclerVie
             favoriteImageView.apply {
                 setImageResource(if (isFavorite) R.drawable.ic_star else R.drawable.ic_star_border) // Picassoというライブラリを使ってImageVIewに画像をはめ込む
                 setOnClickListener {
+                    Log.d("DebugLog", "onClickLister")
                     if (isFavorite) {
                         onClickDeleteFavorite?.invoke(data)
                     } else {

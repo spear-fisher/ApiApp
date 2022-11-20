@@ -47,9 +47,14 @@ class ApiFragment: Fragment() {
         apiAdapter.apply {
             onClickAddFavorite = { // Adapterの処理をそのままActivityに通知する
                 fragmentCallback?.onAddFavorite(it)
+                Log.d("DebugLog", "onClickAddFavorite")
             }
             onClickDeleteFavorite = { // Adapterの処理をそのままActivityに通知する
                 fragmentCallback?.onDeleteFavorite(it.id)
+            }
+            // Itemをクリックしたとき
+            onClickItem = {
+                fragmentCallback?.onClickItem(it)
             }
         }
         // RecyclerViewの初期化
@@ -68,11 +73,11 @@ class ApiFragment: Fragment() {
     }
 
     private fun updateData() {
-        Log.d("DebugLog", "UpdateData")
+        Log.d("DebugLog", "updateData")
 
         val url = StringBuilder()
             .append(getString(R.string.base_url)) // https://webservice.recruit.co.jp/hotpepper/gourmet/v1/
-            .append("?key=").append(getString(R.string.api_key)) // Apiを使うためのApiKey
+            .append("?key=").append("2d015ecf1af22741") // Apiを使うためのApiKey
             .append("&start=").append(1) // 何件目からのデータを取得するか
             .append("&count=").append(COUNT) // 1回で20件取得する
             .append("&keyword=").append(getString(R.string.api_keyword)) // お店の検索ワード。ここでは例として「ランチ」を検索
@@ -110,7 +115,7 @@ class ApiFragment: Fragment() {
 
         client.newCall(request).enqueue(object: Callback {
             override fun onFailure(call: Call, e: IOException) { // Error時の処理
-                Log.d("DebugLog", "ApiFailure")
+                Log.d("DebugLog", "apiFailure")
                 Log.d("DebugLog", url)
 
                 e.printStackTrace()
@@ -119,8 +124,9 @@ class ApiFragment: Fragment() {
                 }
             }
             override fun onResponse(call: Call, response: Response) { // 成功時の処理
-                Log.d("DebugLog", "ApiSuccess")
+                Log.d("DebugLog", "apiSuccess")
                 Log.d("DebugLog", url)
+                Log.d("DebugLog", response.toString())
 
                 var list = listOf<Shop>()
                 response.body?.string()?.also {
