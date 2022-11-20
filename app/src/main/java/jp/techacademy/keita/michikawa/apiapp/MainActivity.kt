@@ -2,6 +2,7 @@ package jp.techacademy.keita.michikawa.apiapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
@@ -31,6 +32,12 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
         }.attach()
     }
 
+    override fun onClickItem(url: String) {
+        WebViewActivity.start(this, url)
+        Log.d("DebugLog", "onClickItem")
+        Log.d("DebugLog", url)
+    }
+
     override fun onAddFavorite(shop: Shop) { // Favoriteに追加するときのメソッド(Fragment -> Activity へ通知する)
         FavoriteShop.insert(FavoriteShop().apply {
             id = shop.id
@@ -39,6 +46,7 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
             url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
         })
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
+        Log.d("DebugLog", "onAddFavorite")
     }
 
     override fun onDeleteFavorite(id: String) { // Favoriteから削除するときのメソッド(Fragment -> Activity へ通知する)
@@ -59,6 +67,7 @@ class MainActivity : AppCompatActivity(), FragmentCallback {
 
     private fun deleteFavorite(id: String) {
         FavoriteShop.delete(id)
+        Log.d("DebugLog", "deleteFavorite")
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
     }
