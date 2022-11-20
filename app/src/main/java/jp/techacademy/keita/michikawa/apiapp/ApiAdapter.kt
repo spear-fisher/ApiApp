@@ -76,6 +76,9 @@ class ApiAdapter(private val context: Context): RecyclerView.Adapter<RecyclerVie
                 // 偶数番目と奇数番目で背景色を変更させる
                 setBackgroundColor(ContextCompat.getColor(context,
                     if (position % 2 == 0) android.R.color.white else android.R.color.darker_gray))
+                setOnClickListener {
+                    onClickItem?.invoke(if (data.couponUrls.sp.isNotEmpty()) data.couponUrls.sp else data.couponUrls.pc)
+                }
             }
             // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
             nameTextView.text = data.name
